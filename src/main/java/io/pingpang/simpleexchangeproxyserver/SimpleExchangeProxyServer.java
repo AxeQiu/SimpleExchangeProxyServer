@@ -6,8 +6,6 @@
 package io.pingpang.simpleexchangeproxyserver;
 
 import io.pingpang.simpleexchangeproxyserver.dispatcher.DispatcherFactory;
-import io.pingpang.simpleexchangeproxyserver.handler.RequestHandle;
-import io.pingpang.simpleexchangeproxyserver.handler.ResponseHandle;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -31,9 +29,9 @@ public class SimpleExchangeProxyServer {
     protected ThreadPoolExecutor acceptorPool;
     protected ThreadPoolExecutor messageHandlerPool;
     
-    protected Connector connector;
+    //protected Connector connector;
     
-    
+    protected Routable routable;
     
     
 
@@ -66,7 +64,8 @@ public class SimpleExchangeProxyServer {
     
     public void start() {
         acceptor.dispatcherPool = dispatcherPool;
-        acceptor.connector = connector;
+        //acceptor.connector = connector;
+        acceptor.routable = getRoutable();
         Future future = acceptorPool.submit(acceptor);
         try {
             future.get();
@@ -112,20 +111,6 @@ public class SimpleExchangeProxyServer {
     }
 
     /**
-     * @return the connector
-     */
-    public Connector getConnector() {
-        return connector;
-    }
-
-    /**
-     * @param connector the connector to set
-     */
-    public void setConnector(Connector connector) {
-        this.connector = connector;
-    }
-
-    /**
      * @return the messageHandlerPoolSize
      */
     public int getMessageHandlerPoolSize() {
@@ -152,8 +137,19 @@ public class SimpleExchangeProxyServer {
     public void setAcceptor(Acceptor acceptor) {
         this.acceptor = acceptor;
     }
-    
-    
-    
+
+    /**
+     * @return the routable
+     */
+    public Routable getRoutable() {
+        return routable;
+    }
+
+    /**
+     * @param routable the routable to set
+     */
+    public void setRoutable(Routable routable) {
+        this.routable = routable;
+    }
     
 }

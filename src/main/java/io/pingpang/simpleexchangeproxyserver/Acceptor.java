@@ -6,13 +6,11 @@
 package io.pingpang.simpleexchangeproxyserver;
 
 import io.pingpang.simpleexchangeproxyserver.dispatcher.DispatcherFactory;
-import io.pingpang.simpleexchangeproxyserver.handler.RequestHandle;
 import io.pingpang.simpleexchangeproxyserver.mbean.AcceptorMBean;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -46,8 +44,9 @@ public class Acceptor implements Callable<Void>, AcceptorMBean {
     
     protected final InetSocketAddress address;
     protected SSLContext sslContext;
-    ThreadPoolExecutor dispatcherPool;
-    Connector connector;
+    protected ThreadPoolExecutor dispatcherPool;
+    //protected Connector connector;
+    protected Routable routable;
     
     
     protected ServerSocket getServerSocket() throws IOException {
@@ -74,7 +73,7 @@ public class Acceptor implements Callable<Void>, AcceptorMBean {
             totalConnection += 1;
             dispatcherPool.submit(
                     DispatcherFactory.getDispatcher(
-                            connection, connector));
+                            connection, routable));
         }
     }
 
@@ -109,6 +108,20 @@ public class Acceptor implements Callable<Void>, AcceptorMBean {
      */
     public void setKeepAlive(boolean keepAlive) {
         this.keepAlive = keepAlive;
+    }
+
+    /**
+     * @return the routable
+     */
+    public Map<Integer, Connector> getRoutable() {
+        return routable;
+    }
+
+    /**
+     * @param routable the routable to set
+     */
+    public void setRoutable(Routable routable) {
+        this.routable = routable;
     }
     
 }

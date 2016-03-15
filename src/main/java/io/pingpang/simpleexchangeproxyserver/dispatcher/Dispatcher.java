@@ -9,10 +9,12 @@ import io.pingpang.simpleexchangeproxyserver.Connector;
 import io.pingpang.simpleexchangeproxyserver.ExchangeInputStream;
 import io.pingpang.simpleexchangeproxyserver.ExchangeResponseInputStream;
 import io.pingpang.simpleexchangeproxyserver.ExchangeSession;
+import io.pingpang.simpleexchangeproxyserver.Routable;
 import io.pingpang.simpleexchangeproxyserver.handler.MessageHandler;
 import io.pingpang.simpleexchangeproxyserver.handler.MessageHandlerFactory;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -25,11 +27,13 @@ public class Dispatcher implements Callable<Void> {
     ThreadPoolExecutor messageHandlerPool;
     
     protected final Socket connection;
-    protected final Connector connector;
+    //protected final Connector connector;
+    protected final Routable routable;
     
-    public Dispatcher(Socket connection, Connector connector) throws IOException {
+    public Dispatcher(Socket connection, Routable routable) throws IOException {
         this.connection = connection;
-        this.connector = connector;
+        //this.connector = connector;
+        this.routable = routable;
         /*
         System.out.println("Left_TcpNoDelay: " + this.connection.getTcpNoDelay());
         System.out.println("Left_KeepAlive: " + this.connection.getKeepAlive());
@@ -43,6 +47,7 @@ public class Dispatcher implements Callable<Void> {
 
     @Override
     public Void call() throws Exception {
+        Connector connector = routable.getConnector(connection.getInetAddress());
         try (ExchangeInputStream eis = new ExchangeInputStream(connection.getInputStream()); 
                 Socket connection2 = connector.getSocket(); ) {
             ExchangeSession session = new ExchangeSession();

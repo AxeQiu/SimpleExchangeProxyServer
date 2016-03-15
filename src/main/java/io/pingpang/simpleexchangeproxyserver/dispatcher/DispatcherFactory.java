@@ -5,7 +5,7 @@
  */
 package io.pingpang.simpleexchangeproxyserver.dispatcher;
 
-import io.pingpang.simpleexchangeproxyserver.Connector;
+import io.pingpang.simpleexchangeproxyserver.Routable;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -18,8 +18,8 @@ public class DispatcherFactory {
     
     protected static ThreadPoolExecutor messageHandlerPool;
     
-    public static Dispatcher getDispatcher(Socket connection, Connector connector) throws IOException {
-        Dispatcher dispatcher = new Dispatcher(connection, connector);
+    public static Dispatcher getDispatcher(Socket connection, Routable routable) throws IOException {
+        Dispatcher dispatcher = new Dispatcher(connection, routable);
         dispatcher.messageHandlerPool = messageHandlerPool;
         return dispatcher;
     }
