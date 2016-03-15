@@ -6,6 +6,10 @@
 package io.pingpang.simpleexchangeproxyserver;
 
 import io.pingpang.simpleexchangeproxyserver.dispatcher.DispatcherFactory;
+import io.pingpang.simpleexchangeproxyserver.handler.RequestHandle;
+import io.pingpang.simpleexchangeproxyserver.handler.ResponseHandle;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -28,6 +32,9 @@ public class SimpleExchangeProxyServer {
     protected ThreadPoolExecutor messageHandlerPool;
     
     protected Connector connector;
+    
+    
+    
     
 
     public SimpleExchangeProxyServer () {
@@ -145,4 +152,8 @@ public class SimpleExchangeProxyServer {
     public void setAcceptor(Acceptor acceptor) {
         this.acceptor = acceptor;
     }
+    
+    
+    
+    
 }

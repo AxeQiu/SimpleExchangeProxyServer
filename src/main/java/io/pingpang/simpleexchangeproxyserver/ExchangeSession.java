@@ -3,12 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package io.pingpang.simpleexchangeproxyserver.handler;
+package io.pingpang.simpleexchangeproxyserver;
+
+import java.util.HashMap;
 
 /**
- *
+ * Attention: Thread No Safe
  * @author qiuyue
  */
-public interface Handle {
+public class ExchangeSession extends HashMap<String, Object> {
     
 }

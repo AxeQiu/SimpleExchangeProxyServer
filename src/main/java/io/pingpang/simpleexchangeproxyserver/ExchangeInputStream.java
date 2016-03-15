@@ -322,9 +322,6 @@ public class ExchangeInputStream extends HttpInputStream {
      * @throws IOException 
      */
     public void readContent() throws IOException {
-        if (content != null) {
-            return;
-        }
         try {
             String value = String.valueOf(getHeaders().get("Content-Length"));
             if (value == null || value.equalsIgnoreCase("null")) {

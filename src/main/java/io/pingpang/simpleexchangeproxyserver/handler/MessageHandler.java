@@ -6,7 +6,10 @@
 package io.pingpang.simpleexchangeproxyserver.handler;
 
 import io.pingpang.simpleexchangeproxyserver.ExchangeInputStream;
+import io.pingpang.simpleexchangeproxyserver.ExchangeRequestLine;
+import io.pingpang.simpleexchangeproxyserver.ExchangeSession;
 import java.io.OutputStream;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 /**
@@ -16,27 +19,15 @@ import java.util.concurrent.Callable;
 public abstract class MessageHandler implements Callable<Void> {
     protected ExchangeInputStream input;
     protected OutputStream output;
-    protected Handle handle;
+    protected ExchangeSession session;
+    protected Map<ExchangeRequestLine, RequestHandle> requestHandleMap;
+    protected Map<ExchangeRequestLine, ResponseHandle> responseHandleMap;
     
     protected Object parseNull(Object obj) {
         if (obj == null || obj.toString().toLowerCase().equals("null")) {
             return null;
         }
         return obj;
-    }
-
-    /**
-     * @return the handle
-     */
-    public Handle getHandle() {
-        return handle;
-    }
-
-    /**
-     * @param handle the handle to set
-     */
-    public void setHandle(Handle handle) {
-        this.handle = handle;
     }
 
     /**
@@ -65,6 +56,48 @@ public abstract class MessageHandler implements Callable<Void> {
      */
     public void setInput(ExchangeInputStream input) {
         this.input = input;
+    }
+
+    /**
+     * @return the session
+     */
+    public ExchangeSession getSession() {
+        return session;
+    }
+
+    /**
+     * @param session the session to set
+     */
+    public void setSession(ExchangeSession session) {
+        this.session = session;
+    }
+
+    /**
+     * @return the requestHandleMap
+     */
+    public Map<ExchangeRequestLine, RequestHandle> getRequestHandleMap() {
+        return requestHandleMap;
+    }
+
+    /**
+     * @param requestHandleMap the requestHandleMap to set
+     */
+    public void setRequestHandleMap(Map<ExchangeRequestLine, RequestHandle> requestHandleMap) {
+        this.requestHandleMap = requestHandleMap;
+    }
+
+    /**
+     * @return the responseHandleMap
+     */
+    public Map<ExchangeRequestLine, ResponseHandle> getResponseHandleMap() {
+        return responseHandleMap;
+    }
+
+    /**
+     * @param responseHandleMap the responseHandleMap to set
+     */
+    public void setResponseHandleMap(Map<ExchangeRequestLine, ResponseHandle> responseHandleMap) {
+        this.responseHandleMap = responseHandleMap;
     }
     
 }

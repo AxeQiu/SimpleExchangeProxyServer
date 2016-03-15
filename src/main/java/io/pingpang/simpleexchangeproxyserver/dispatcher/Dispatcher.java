@@ -8,6 +8,7 @@ package io.pingpang.simpleexchangeproxyserver.dispatcher;
 import io.pingpang.simpleexchangeproxyserver.Connector;
 import io.pingpang.simpleexchangeproxyserver.ExchangeInputStream;
 import io.pingpang.simpleexchangeproxyserver.ExchangeResponseInputStream;
+import io.pingpang.simpleexchangeproxyserver.ExchangeSession;
 import io.pingpang.simpleexchangeproxyserver.handler.MessageHandler;
 import io.pingpang.simpleexchangeproxyserver.handler.MessageHandlerFactory;
 import java.io.IOException;
@@ -44,49 +45,53 @@ public class Dispatcher implements Callable<Void> {
     public Void call() throws Exception {
         try (ExchangeInputStream eis = new ExchangeInputStream(connection.getInputStream()); 
                 Socket connection2 = connector.getSocket(); ) {
+            ExchangeSession session = new ExchangeSession();
             while (true) {
                 eis.readRequest();
                 
-                /*Test*/
+                /*Test
                 System.out.println(eis.getMethod() + " " + eis.getPath());
                 eis.getHeaders().forEach((key, value) -> {
                     System.out.println(key + " : " + value);
                 });
-                /*Test*/
+                Test*/
                 
-                MessageHandler requestHandler = MessageHandlerFactory.getDefaultMessageHandler();
+                MessageHandler requestHandler = MessageHandlerFactory.getNormalMessagehandler();
+                requestHandler.setRequestHandleMap(connector.getRequestHandle());
+                requestHandler.setSession(session);
                 requestHandler.setInput(eis);
                 requestHandler.setOutput(connection2.getOutputStream());
                 messageHandlerPool.submit(requestHandler).get();
                 
                 
-                /*Test*/
+                /*Test
                 System.out.println("");
-                /*Test*/
+                Test*/
                 
                 ExchangeResponseInputStream eris = new ExchangeResponseInputStream(connection2.getInputStream());
                 eris.readRequest();
                 
-                /*Test*/
+                /*Test
                 eris.getHeaders().forEach((key, value) -> {
                     System.out.println(key + " : " + value);
                 });
-                /*Test*/
+                Test*/
                 
                 boolean isChunked = eris.isChunked();
                 MessageHandler responseHandler = isChunked ? 
                         MessageHandlerFactory.getChunkedMessageHandler() :
-                        MessageHandlerFactory.getDefaultMessageHandler();
-                
+                        MessageHandlerFactory.getNormalMessagehandler();
+                responseHandler.setResponseHandleMap(connector.getResponseHandle());
+                responseHandler.setSession(session);
                 responseHandler.setInput(eris);
                 responseHandler.setOutput(connection.getOutputStream());
                 messageHandlerPool.submit(responseHandler).get();
                 
             }
         } catch (IOException e) {
-            /*Test*/
+            /*Test
             e.printStackTrace(System.out);
-            /*Test*/
+            Test*/
             throw e;
         }
     }

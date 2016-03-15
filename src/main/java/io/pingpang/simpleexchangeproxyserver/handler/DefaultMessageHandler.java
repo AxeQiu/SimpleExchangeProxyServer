@@ -5,8 +5,6 @@
  */
 package io.pingpang.simpleexchangeproxyserver.handler;
 
-import java.io.IOException;
-
 /**
  *
  * @author qiuyue

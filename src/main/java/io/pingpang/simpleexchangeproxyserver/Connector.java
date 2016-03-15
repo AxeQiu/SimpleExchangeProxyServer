@@ -5,11 +5,15 @@
  */
 package io.pingpang.simpleexchangeproxyserver;
 
+import io.pingpang.simpleexchangeproxyserver.handler.RequestHandle;
+import io.pingpang.simpleexchangeproxyserver.handler.ResponseHandle;
 import io.pingpang.simpleexchangeproxyserver.mbean.ConnectorMBean;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 import javax.net.ssl.SSLContext;
 
 /**
@@ -26,6 +30,9 @@ public class Connector implements ConnectorMBean {
     protected final InetAddress address;
     protected final int port;
     protected SSLContext sslContext;
+    
+    protected Map<ExchangeRequestLine, RequestHandle> requestHandleMap = new HashMap<>();
+    protected Map<ExchangeRequestLine, ResponseHandle> responseHandleMap = new HashMap<>();
     
     public Connector(InetAddress target, int port) {
         this.address = target;
@@ -93,4 +100,19 @@ public class Connector implements ConnectorMBean {
         this.keepAlive = keepAlive;
     }
     
+    public void registerRequestHandle(ExchangeRequestLine requestLine, RequestHandle handle) {
+        requestHandleMap.put(requestLine, handle);
+    }
+    
+    public void registerResponseHandle(ExchangeRequestLine requestLine, ResponseHandle handle) {
+        responseHandleMap.put(requestLine, handle);
+    }
+    
+    public Map<ExchangeRequestLine, RequestHandle> getRequestHandle() {
+        return requestHandleMap;
+    }
+    
+    public Map<ExchangeRequestLine, ResponseHandle> getResponseHandle() {
+        return responseHandleMap;
+    }
 }

@@ -16,8 +16,13 @@ public class MessageHandlerFactory {
         return handler;
     }
     
-    public static ChunkedMessageHandler getChunkedMessageHandler() {
+    public static MessageHandler getChunkedMessageHandler() {
         ChunkedMessageHandler handler = new ChunkedMessageHandler();
+        return handler;
+    }
+    
+    public static MessageHandler getNormalMessagehandler() {
+        NormalMessageHandler handler = new NormalMessageHandler();
         return handler;
     }
 }

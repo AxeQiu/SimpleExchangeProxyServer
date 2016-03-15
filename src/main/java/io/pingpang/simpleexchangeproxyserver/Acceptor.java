@@ -6,11 +6,14 @@
 package io.pingpang.simpleexchangeproxyserver;
 
 import io.pingpang.simpleexchangeproxyserver.dispatcher.DispatcherFactory;
+import io.pingpang.simpleexchangeproxyserver.handler.RequestHandle;
 import io.pingpang.simpleexchangeproxyserver.mbean.AcceptorMBean;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ThreadPoolExecutor;
 import javax.net.ssl.SSLContext;
@@ -25,6 +28,7 @@ public class Acceptor implements Callable<Void>, AcceptorMBean {
     
     protected int soTimeout = 1000 * 60 * 10;
     protected boolean keepAlive = true;
+    
 
     /**
      * @return the soTimeout
@@ -106,6 +110,5 @@ public class Acceptor implements Callable<Void>, AcceptorMBean {
     public void setKeepAlive(boolean keepAlive) {
         this.keepAlive = keepAlive;
     }
-    
     
 }
