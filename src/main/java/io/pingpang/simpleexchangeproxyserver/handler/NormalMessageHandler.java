@@ -103,9 +103,7 @@ public class NormalMessageHandler extends MessageHandler {
 
         return completeRequest;
     }
-    
-    
-    
+
     protected void handleResponse(ExchangeRequestLine requestLine) throws IOException {
         if (getResponseHandleMap().containsKey(requestLine)) {
             ResponseHandle handle = getResponseHandleMap().get(requestLine);
@@ -113,6 +111,7 @@ public class NormalMessageHandler extends MessageHandler {
             ExchangeResponseLine responseLine = new ExchangeResponseLine();
             responseLine.setResponseCode(responseCode);
             handle.setResponseLine(responseLine);
+            handle.setSession(session);
             handle.handle(); //Hook
             if (!handle.block) {
                 directlyTransmit();
@@ -132,7 +131,6 @@ public class NormalMessageHandler extends MessageHandler {
         this.output = temp;
         mockOutput.reset();
     }
-    
 
     @Override
     public Void call() throws Exception {

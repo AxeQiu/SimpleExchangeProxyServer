@@ -25,7 +25,6 @@ public class Connector implements ConnectorMBean {
     private static long totalConnection = 0;
     
     protected int soTimeout = 1000 * 60;
-    protected boolean keepAlive = true;
     
     protected final InetAddress address;
     protected final int port;
@@ -45,8 +44,9 @@ public class Connector implements ConnectorMBean {
                 new Socket() :
                 sslContext.getSocketFactory().createSocket();
         socket.setPerformancePreferences(2, 1, 0);
+        socket.setTrafficClass(0xb8);
         socket.setSoTimeout(soTimeout);
-        socket.setKeepAlive(isKeepAlive());
+        socket.setKeepAlive(true);
         socket.setTcpNoDelay(true);
         socket.connect(new InetSocketAddress(address, port));
         totalConnection += 1;
@@ -84,20 +84,6 @@ public class Connector implements ConnectorMBean {
      */
     public void setSoTimeout(int soTimeout) {
         this.soTimeout = soTimeout;
-    }
-
-    /**
-     * @return the keepAlive
-     */
-    public boolean isKeepAlive() {
-        return keepAlive;
-    }
-
-    /**
-     * @param keepAlive the keepAlive to set
-     */
-    public void setKeepAlive(boolean keepAlive) {
-        this.keepAlive = keepAlive;
     }
     
     public void registerRequestHandle(ExchangeRequestLine requestLine, RequestHandle handle) {

@@ -35,10 +35,16 @@ public abstract class RequestHandle {
         this.session = session;
     }
     
+    /**
+     * 
+     */
     public void setTransmit() {
         this.block = false;
     }
     
+    /**
+     * 
+     */
     public void setBlock() {
         this.block = true;
     }

@@ -41,4 +41,18 @@ public abstract class ResponseHandle {
     public void setResponseLine(ExchangeResponseLine responseLine) {
         this.responseLine = responseLine;
     }
+
+    /**
+     * @return the session
+     */
+    public ExchangeSession getSession() {
+        return session;
+    }
+
+    /**
+     * @param session the session to set
+     */
+    public void setSession(ExchangeSession session) {
+        this.session = session;
+    }
 }

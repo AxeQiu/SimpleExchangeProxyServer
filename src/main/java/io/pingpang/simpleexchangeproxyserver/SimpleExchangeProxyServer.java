@@ -6,12 +6,11 @@
 package io.pingpang.simpleexchangeproxyserver;
 
 import io.pingpang.simpleexchangeproxyserver.dispatcher.DispatcherFactory;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -19,17 +18,11 @@ import java.util.concurrent.ThreadPoolExecutor;
  */
 public class SimpleExchangeProxyServer {
 
-    protected int messageHandlerPoolSize = 100;
-    protected int dispatcherPoolSize = 100;
-    protected int acceptorPoolSize = 10;
+    protected int threadPoolSize = 6000;
     
     protected Acceptor acceptor;
     
-    protected ThreadPoolExecutor dispatcherPool;
-    protected ThreadPoolExecutor acceptorPool;
-    protected ThreadPoolExecutor messageHandlerPool;
-    
-    //protected Connector connector;
+    protected ThreadPoolExecutor threadPool;
     
     protected Routable routable;
     
@@ -37,36 +30,18 @@ public class SimpleExchangeProxyServer {
 
     public SimpleExchangeProxyServer () {
         
-        System.setProperty("http.keepAlive", "true");
-        System.setProperty("http.maxConnections", "100");
-        System.setProperty("sun.net.http.errorstream.enableBuffering", "true");
-        System.setProperty("sun.net.http.errorstream.timeout", "300");
-        System.setProperty("sun.net.http.errorstream.bufferSize", "4096");
-        
-        messageHandlerPool = (ThreadPoolExecutor)Executors.newFixedThreadPool(messageHandlerPoolSize, (Runnable r) -> {
-            Thread t = new Thread (r, "Thread-MessageHandler");
+        threadPool = (ThreadPoolExecutor)Executors.newFixedThreadPool(threadPoolSize, (Runnable r) -> {
+            Thread t = new Thread (r, "Thread-Handler");
             return t;
         });
-
-        dispatcherPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(dispatcherPoolSize, (Runnable r) -> {
-            Thread t = new Thread(r, "Thread-Dispatcher");
-            return t;
-        });
-
-        acceptorPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(acceptorPoolSize, (Runnable r) -> {
-            Thread t = new Thread(r, "Thread-Acceptor");
-            return t;
-        });
-        
-        DispatcherFactory.setMessageHandlerPool(messageHandlerPool);
-
+        threadPool.setKeepAliveTime(30, TimeUnit.MINUTES);
+        DispatcherFactory.setMessageHandlerPool(threadPool);
     }
     
     public void start() {
-        acceptor.dispatcherPool = dispatcherPool;
-        //acceptor.connector = connector;
+        acceptor.handlerPool = getThreadPool();
         acceptor.routable = getRoutable();
-        Future future = acceptorPool.submit(acceptor);
+        Future future = getThreadPool().submit(acceptor);
         try {
             future.get();
         } catch (InterruptedException | ExecutionException e) {
@@ -77,51 +52,7 @@ public class SimpleExchangeProxyServer {
     }
     
     public void stop() {
-        acceptorPool.shutdownNow();
-        dispatcherPool.shutdownNow();
-        messageHandlerPool.shutdownNow();
-    }
-
-    /**
-     * @return the dispatcherPoolSize
-     */
-    public int getDispatcherPoolSize() {
-        return dispatcherPoolSize;
-    }
-
-    /**
-     * @param dispatcherPoolSize the dispatcherPoolSize to set
-     */
-    public void setDispatcherPoolSize(int dispatcherPoolSize) {
-        this.dispatcherPoolSize = dispatcherPoolSize;
-    }
-
-    /**
-     * @return the acceptorPoolSize
-     */
-    public int getAcceptorPoolSize() {
-        return acceptorPoolSize;
-    }
-
-    /**
-     * @param acceptorPoolSize the acceptorPoolSize to set
-     */
-    public void setAcceptorPoolSize(int acceptorPoolSize) {
-        this.acceptorPoolSize = acceptorPoolSize;
-    }
-
-    /**
-     * @return the messageHandlerPoolSize
-     */
-    public int getMessageHandlerPoolSize() {
-        return messageHandlerPoolSize;
-    }
-
-    /**
-     * @param messageHandlerPoolSize the messageHandlerPoolSize to set
-     */
-    public void setMessageHandlerPoolSize(int messageHandlerPoolSize) {
-        this.messageHandlerPoolSize = messageHandlerPoolSize;
+        getThreadPool().shutdownNow();
     }
 
     /**
@@ -150,6 +81,35 @@ public class SimpleExchangeProxyServer {
      */
     public void setRoutable(Routable routable) {
         this.routable = routable;
+    }
+
+    /**
+     * @return the threadPool
+     */
+    public ThreadPoolExecutor getThreadPool() {
+        return threadPool;
+    }
+
+    /**
+     * @param threadPool the threadPool to set
+     */
+    public void setThreadPool(ThreadPoolExecutor threadPool) {
+        this.threadPool = threadPool;
+    }
+
+    /**
+     * @return the threadPoolSize
+     */
+    public int getThreadPoolSize() {
+        return threadPoolSize;
+    }
+
+    /**
+     * @param threadPoolSize the threadPoolSize to set
+     */
+    public void setThreadPoolSize(int threadPoolSize) {
+        this.threadPoolSize = threadPoolSize;
+        threadPool.setCorePoolSize(threadPoolSize);
     }
     
 }

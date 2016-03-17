@@ -14,7 +14,6 @@ import io.pingpang.simpleexchangeproxyserver.handler.MessageHandler;
 import io.pingpang.simpleexchangeproxyserver.handler.MessageHandlerFactory;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -27,22 +26,11 @@ public class Dispatcher implements Callable<Void> {
     ThreadPoolExecutor messageHandlerPool;
     
     protected final Socket connection;
-    //protected final Connector connector;
     protected final Routable routable;
     
-    public Dispatcher(Socket connection, Routable routable) throws IOException {
+    public Dispatcher(Socket connection, Routable routable) {
         this.connection = connection;
-        //this.connector = connector;
         this.routable = routable;
-        /*
-        System.out.println("Left_TcpNoDelay: " + this.connection.getTcpNoDelay());
-        System.out.println("Left_KeepAlive: " + this.connection.getKeepAlive());
-        System.out.println("System_http.keepAlive: " + System.getProperty("http.keepAlive"));
-        System.out.println("System_http.maxConnections: " + System.getProperty("http.maxConnections"));
-        System.out.println("System_http.errorstream.enableBuffering: " + System.getProperty("sun.net.http.errorstream.enableBuffering"));
-        System.out.println("System_http.errorstream.timeout: " + System.getProperty("sun.net.http.errorstream.timeout"));
-        System.out.println("System_http.errorstream.bufferSize: " + System.getProperty("sun.net.http.errorstream.bufferSize"));
-        */
     }
 
     @Override

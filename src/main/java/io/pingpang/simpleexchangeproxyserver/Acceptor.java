@@ -25,30 +25,17 @@ public class Acceptor implements Callable<Void>, AcceptorMBean {
     private static long totalConnection = 0;
     
     protected int soTimeout = 1000 * 60 * 10;
-    protected boolean keepAlive = true;
-    
-
-    /**
-     * @return the soTimeout
-     */
-    public int getSoTimeout() {
-        return soTimeout;
-    }
-
-    /**
-     * @param aSoTimeout the soTimeout to set
-     */
-    public void setSoTimeout(int aSoTimeout) {
-        this.soTimeout = aSoTimeout;
-    }
     
     protected final InetSocketAddress address;
     protected SSLContext sslContext;
-    protected ThreadPoolExecutor dispatcherPool;
-    //protected Connector connector;
+    protected ThreadPoolExecutor handlerPool;
     protected Routable routable;
     
-    
+    /**
+     * 
+     * @return
+     * @throws IOException 
+     */
     protected ServerSocket getServerSocket() throws IOException {
         return 
                 getSslContext() == null ?
@@ -60,6 +47,11 @@ public class Acceptor implements Callable<Void>, AcceptorMBean {
         this.address = address;
     }
 
+    /**
+     * 
+     * @return
+     * @throws IOException 
+     */
     @Override
     public Void call() throws IOException {
         ServerSocket serverSocket = getServerSocket();
@@ -67,11 +59,12 @@ public class Acceptor implements Callable<Void>, AcceptorMBean {
         serverSocket.bind(address);
         while (true) {
             Socket connection = serverSocket.accept();
+            connection.setTrafficClass(0xb8);
             connection.setSoTimeout(soTimeout);
-            connection.setKeepAlive(isKeepAlive());
+            connection.setKeepAlive(true);
             connection.setTcpNoDelay(true);
             totalConnection += 1;
-            dispatcherPool.submit(
+            handlerPool.submit(
                     DispatcherFactory.getDispatcher(
                             connection, routable));
         }
@@ -97,20 +90,6 @@ public class Acceptor implements Callable<Void>, AcceptorMBean {
     }
 
     /**
-     * @return the keepAlive
-     */
-    public boolean isKeepAlive() {
-        return keepAlive;
-    }
-
-    /**
-     * @param keepAlive the keepAlive to set
-     */
-    public void setKeepAlive(boolean keepAlive) {
-        this.keepAlive = keepAlive;
-    }
-
-    /**
      * @return the routable
      */
     public Map<Integer, Connector> getRoutable() {
@@ -122,6 +101,20 @@ public class Acceptor implements Callable<Void>, AcceptorMBean {
      */
     public void setRoutable(Routable routable) {
         this.routable = routable;
+    }
+    
+    /**
+     * @return the soTimeout
+     */
+    public int getSoTimeout() {
+        return soTimeout;
+    }
+
+    /**
+     * @param aSoTimeout the soTimeout to set
+     */
+    public void setSoTimeout(int aSoTimeout) {
+        this.soTimeout = aSoTimeout;
     }
     
 }
