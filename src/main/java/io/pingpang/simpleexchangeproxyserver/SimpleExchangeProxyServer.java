@@ -17,8 +17,6 @@ import java.util.concurrent.TimeUnit;
  * @author qiuyue
  */
 public class SimpleExchangeProxyServer {
-
-    protected int threadPoolSize = 6000;
     
     protected Acceptor acceptor;
     
@@ -30,7 +28,7 @@ public class SimpleExchangeProxyServer {
 
     public SimpleExchangeProxyServer () {
         
-        threadPool = (ThreadPoolExecutor)Executors.newFixedThreadPool(threadPoolSize, (Runnable r) -> {
+        threadPool = (ThreadPoolExecutor)Executors.newCachedThreadPool((Runnable r) -> {
             Thread t = new Thread (r, "Thread-Handler");
             return t;
         });
@@ -96,20 +94,4 @@ public class SimpleExchangeProxyServer {
     public void setThreadPool(ThreadPoolExecutor threadPool) {
         this.threadPool = threadPool;
     }
-
-    /**
-     * @return the threadPoolSize
-     */
-    public int getThreadPoolSize() {
-        return threadPoolSize;
-    }
-
-    /**
-     * @param threadPoolSize the threadPoolSize to set
-     */
-    public void setThreadPoolSize(int threadPoolSize) {
-        this.threadPoolSize = threadPoolSize;
-        threadPool.setCorePoolSize(threadPoolSize);
-    }
-    
 }
