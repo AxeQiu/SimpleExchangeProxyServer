@@ -335,12 +335,12 @@ public class ExchangeInputStream extends HttpInputStream {
             int total = headerLength + contentLength;
             mark(total);
             byte[] bs = new byte[total];
-            int readed = 0;
+            int readed;
             int begin = 0;
             int rest = total;
-            while ((readed = this.read(bs, begin, rest)) != rest && readed != -1) {
-                begin = readed;
-                rest = total - readed;
+            while (rest != 0 && (readed = this.read(bs, begin, rest)) != -1) {
+                begin += readed;
+                rest -= readed;
             }
             reset();
             content = Arrays.copyOfRange(bs, headerLength, total);

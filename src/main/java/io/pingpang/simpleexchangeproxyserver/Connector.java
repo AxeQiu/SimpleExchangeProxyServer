@@ -45,7 +45,7 @@ public class Connector implements ConnectorMBean {
                 sslContext.getSocketFactory().createSocket();
         socket.setPerformancePreferences(2, 1, 0);
         socket.setTrafficClass(0xb8);
-        socket.setSoTimeout(soTimeout);
+        //socket.setSoTimeout(soTimeout);
         socket.setKeepAlive(true);
         socket.setTcpNoDelay(true);
         socket.connect(new InetSocketAddress(address, port));
