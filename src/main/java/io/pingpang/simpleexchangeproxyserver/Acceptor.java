@@ -24,7 +24,7 @@ public class Acceptor implements Callable<Void>, AcceptorMBean {
     
     private static long totalConnection = 0;
     
-    protected int soTimeout = 1000 * 60 * 10;
+    protected int soTimeout = 1000 * 60 * 30;
     
     protected final InetSocketAddress address;
     protected SSLContext sslContext;

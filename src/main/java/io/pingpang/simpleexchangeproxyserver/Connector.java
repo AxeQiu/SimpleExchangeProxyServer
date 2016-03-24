@@ -24,7 +24,7 @@ public class Connector implements ConnectorMBean {
     
     private static long totalConnection = 0;
     
-    protected int soTimeout = 1000 * 60;
+    protected int soTimeout = 0;
     
     protected final InetAddress address;
     protected final int port;
@@ -45,7 +45,7 @@ public class Connector implements ConnectorMBean {
                 sslContext.getSocketFactory().createSocket();
         socket.setPerformancePreferences(2, 1, 0);
         socket.setTrafficClass(0xb8);
-        //socket.setSoTimeout(soTimeout);
+        socket.setSoTimeout(soTimeout);
         socket.setKeepAlive(true);
         socket.setTcpNoDelay(true);
         socket.connect(new InetSocketAddress(address, port));

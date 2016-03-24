@@ -22,7 +22,7 @@ import java.util.Map;
 public class NormalMessageHandler extends MessageHandler {
     
     protected void directlyTransmit() throws IOException {
-        int buffersize = 1024;
+        int buffersize = 16384;
         int headerLength = input.getHeaderLength();
         String value = String.valueOf(input.getHeader("Content-Length"));
         int contentLength;
