@@ -40,7 +40,7 @@ public class ExchangeInputStream extends HttpInputStream {
 
     protected final Map<String, String> attributes = new HashMap<>();
     
-    protected byte[] content = null;
+    protected byte[] content = new byte[0];
     
     protected final Map headers = new HashMap();
     
