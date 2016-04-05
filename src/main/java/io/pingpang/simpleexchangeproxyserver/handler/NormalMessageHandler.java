@@ -73,7 +73,7 @@ public class NormalMessageHandler extends MessageHandler {
         }
     }
     
-    protected byte[] convert(ExchangeRequestObject requestObject) {
+    protected byte[] convert(ExchangeRequestObject requestObject) throws IOException {
         ExchangeRequestLine requestLine = requestObject.getRequestLine();
         String version = requestLine.getVersion();
         Map headers = requestObject.getHeaders();
@@ -95,7 +95,7 @@ public class NormalMessageHandler extends MessageHandler {
         });
         sb.append("\r\n");
         
-        byte[] part1 = sb.toString().getBytes();
+        byte[] part1 = sb.toString().getBytes("ISO8859-1");
         
         byte[] completeRequest = new byte[part1.length + content.length];
         System.arraycopy(part1, 0, completeRequest, 0, part1.length);

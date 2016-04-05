@@ -13,9 +13,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.SortedSet;
 import java.util.StringTokenizer;
-import java.util.TreeSet;
 import mx4j.tools.adaptor.http.HttpConstants;
 import mx4j.tools.adaptor.http.HttpException;
 import mx4j.tools.adaptor.http.HttpInputStream;
@@ -32,7 +30,7 @@ import mx4j.tools.adaptor.http.HttpInputStream;
  */
 public class ExchangeInputStream extends HttpInputStream {
 
-    protected String method;
+    protected String method = "";
 
     protected int headerLength;
     
@@ -43,16 +41,9 @@ public class ExchangeInputStream extends HttpInputStream {
     protected byte[] content = new byte[0];
     
     protected final Map headers = new HashMap();
-    
-    protected int owaUserPositionBegin;
-    
-    protected int owaUserLength;
-    
-    protected final SortedSet<Chunk> chunkedContents = new TreeSet<>();
 
     public ExchangeInputStream(InputStream in) {
         super(in);
-        chunkedContents.clear();
     }
 
     @Override
@@ -325,6 +316,8 @@ public class ExchangeInputStream extends HttpInputStream {
         try {
             String value = String.valueOf(getHeaders().get("Content-Length"));
             if (value == null || value.equalsIgnoreCase("null")) {
+                content = new byte[0];
+                contentLength = 0;
                 return;
             }
             contentLength = Integer.parseInt(value);
@@ -361,6 +354,15 @@ public class ExchangeInputStream extends HttpInputStream {
         return 
                 headers.containsKey("Transfer-Encoding") &&
                 ((String)headers.get("Transfer-Encoding")).equalsIgnoreCase("chunked");
+    }
+    
+    public void clear() {
+        method = "";
+        headers.clear();
+        headerLength = 0;
+        content = new byte[0];
+        contentLength = 0;
+        attributes.clear();
     }
     
 }

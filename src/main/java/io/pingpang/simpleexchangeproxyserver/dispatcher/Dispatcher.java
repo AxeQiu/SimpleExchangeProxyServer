@@ -40,6 +40,7 @@ public class Dispatcher implements Callable<Void> {
                 Socket connection2 = connector.getSocket(); ) {
             ExchangeSession session = new ExchangeSession();
             while (true) {
+                eis.clear();
                 eis.readRequest();
                 
                 /*Test
