@@ -39,6 +39,7 @@ public class Dispatcher implements Callable<Void> {
         try (ExchangeInputStream eis = new ExchangeInputStream(connection.getInputStream()); 
                 Socket connection2 = connector.getSocket(); ) {
             ExchangeSession session = new ExchangeSession();
+            session.put("endpoint", connection.getRemoteSocketAddress());
             while (true) {
                 eis.clear();
                 eis.readRequest();
