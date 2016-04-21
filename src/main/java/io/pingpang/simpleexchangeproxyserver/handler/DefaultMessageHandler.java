@@ -34,7 +34,6 @@ public class DefaultMessageHandler extends MessageHandler {
             if (c == -1) {
                 break;
             }
-            //System.out.println(new String(buffer, 0, c));
             output.write(buffer, 0, c);
             output.flush();
             readed += c;

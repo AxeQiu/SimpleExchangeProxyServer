@@ -13,46 +13,7 @@ import io.pingpang.simpleexchangeproxyserver.ExchangeSession;
  * @author qiuyue
  */
 public abstract class ResponseHandle {
-    protected ExchangeSession session;
-    protected ExchangeResponseLine responseLine;
     
-    protected boolean block = false;
+    public abstract boolean handle(ExchangeSession session, ExchangeResponseLine responseLine);
     
-    public abstract void handle();
-    
-    public void setTransmit() {
-        this.block = false;
-    }
-    
-    public void setBlock() {
-        this.block = true;
-    }
-
-    /**
-     * @return the responseLine
-     */
-    public ExchangeResponseLine getResponseLine() {
-        return responseLine;
-    }
-
-    /**
-     * @param responseLine the responseLine to set
-     */
-    public void setResponseLine(ExchangeResponseLine responseLine) {
-        this.responseLine = responseLine;
-    }
-
-    /**
-     * @return the session
-     */
-    public ExchangeSession getSession() {
-        return session;
-    }
-
-    /**
-     * @param session the session to set
-     */
-    public void setSession(ExchangeSession session) {
-        this.session = session;
-    }
 }

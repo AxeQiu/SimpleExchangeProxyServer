@@ -59,10 +59,8 @@ public class NormalMessageHandler extends MessageHandler {
             requestObject.setRequestLine(requestLine);
             requestObject.setHeaders(input.getHeaders());
             requestObject.setContent(input.getContent());
-            handle.setSession(session);
-            handle.setRequestObject(requestObject);
-            handle.handle(); //Hook
-            if (!handle.block) {
+            boolean isBlock = handle.handle(session, requestObject); //Hook
+            if (!isBlock) {
                 byte[] requestBytes = convert(requestObject);
                 output.write(requestBytes);
                 output.flush();
@@ -110,10 +108,8 @@ public class NormalMessageHandler extends MessageHandler {
             int responseCode = ((ExchangeResponseInputStream)input).getStatusCode();
             ExchangeResponseLine responseLine = new ExchangeResponseLine();
             responseLine.setResponseCode(responseCode);
-            handle.setResponseLine(responseLine);
-            handle.setSession(session);
-            handle.handle(); //Hook
-            if (!handle.block) {
+            boolean isBlock = handle.handle(session, responseLine); //Hook
+            if (!isBlock) {
                 directlyTransmit();
             } else {
                 dumpInputStream(input);

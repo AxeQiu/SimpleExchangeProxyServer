@@ -75,7 +75,6 @@ public class ChunkedMessageHandler extends MessageHandler {
                     return null;
                 }
                 output.write((s + "\r\n").getBytes());
-                //output.flush();
                 int size = chunkSize + 2; // \r\n
                 byte[] buffer = new byte[size];
                 int readed;
@@ -83,7 +82,6 @@ public class ChunkedMessageHandler extends MessageHandler {
                 while ((readed = input.read(buffer, 0, rest)) != -1) {
                     rest -= readed;
                     output.write(buffer, 0, readed);
-                    //output.flush();
                     if (rest == 0) {
                         break;
                     }
@@ -93,21 +91,8 @@ public class ChunkedMessageHandler extends MessageHandler {
                 }
             }
         } catch (IOException | NumberFormatException e) {
-            //e.printStackTrace(System.out);
             throw e;
         }
-
-        /*
-        int buffersize = 1024;
-        int readed;
-        byte[] buffer = new byte[buffersize];
-        while ((readed = input.read(buffer)) != -1) {
-            output.write(buffer, 0, readed);
-            System.out.println(new String(buffer, 0, readed));
-        }
-        output.flush();
-        return null;
-                */
     }
     
 }
