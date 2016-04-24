@@ -12,8 +12,8 @@ import io.pingpang.simpleexchangeproxyserver.ExchangeSession;
  *
  * @author qiuyue
  */
-public abstract class ResponseHandle {
+public interface ResponseHandle {
     
-    public abstract boolean handle(ExchangeSession session, ExchangeResponseLine responseLine);
+    public boolean handle(ExchangeSession session, ExchangeResponseLine responseLine);
     
 }

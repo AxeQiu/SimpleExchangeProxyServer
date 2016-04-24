@@ -13,7 +13,7 @@ import mx4j.tools.adaptor.http.HttpException;
  *
  * @author qiuyue
  */
-public abstract class RequestHandle {
+public interface RequestHandle {
     
-    public abstract boolean handle(ExchangeSession session, ExchangeRequestObject requestObject) throws HttpException;
+    public boolean handle(ExchangeSession session, ExchangeRequestObject requestObject) throws HttpException;
 }
