@@ -13,6 +13,7 @@ import io.pingpang.simpleexchangeproxyserver.ExchangeResponseLine;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -57,8 +58,13 @@ public class NormalMessageHandler extends MessageHandler {
             RequestHandle handle = getRequestHandleMap().get(requestLine);
             ExchangeRequestObject requestObject = new ExchangeRequestObject();
             requestObject.setRequestLine(requestLine);
-            requestObject.setHeaders(input.getHeaders());
-            requestObject.setContent(input.getContent());
+            
+            //ATTATION: MUST make a shallow copy
+            requestObject.setHeaders(new HashMap(input.getHeaders())); 
+            byte[] contentCopy = new byte[input.getContent().length];
+            System.arraycopy(input.getContent(), 0, contentCopy, 0, input.getContent().length);
+            requestObject.setContent(contentCopy);
+            
             boolean isBlock = handle.handle(session, requestObject); //Hook
             if (!isBlock) {
                 byte[] requestBytes = convert(requestObject);
@@ -76,7 +82,7 @@ public class NormalMessageHandler extends MessageHandler {
         String version = requestLine.getVersion();
         Map headers = requestObject.getHeaders();
         byte[] content = requestObject.getContent();
-        
+
         StringBuilder sb = new StringBuilder();
         sb.delete(0, sb.length());
         
