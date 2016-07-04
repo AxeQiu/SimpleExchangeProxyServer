@@ -11,6 +11,8 @@ package io.pingpang.simpleexchangeproxyserver;
  */
 public class ExchangeResponseLine {
     protected int responseCode;
+    protected String version;
+    protected String reason;
 
     /**
      * @return the responseCode
@@ -24,5 +26,33 @@ public class ExchangeResponseLine {
      */
     public void setResponseCode(int responseCode) {
         this.responseCode = responseCode;
+    }
+
+    /**
+     * @return the version
+     */
+    public String getVersion() {
+        return version;
+    }
+
+    /**
+     * @param version the version to set
+     */
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    /**
+     * @return the reason
+     */
+    public String getReason() {
+        return reason;
+    }
+
+    /**
+     * @param reason the reason to set
+     */
+    public void setReason(String reason) {
+        this.reason = reason;
     }
 }

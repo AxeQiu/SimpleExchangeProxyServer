@@ -10,6 +10,7 @@ import io.pingpang.simpleexchangeproxyserver.ExchangeRequestLine;
 import io.pingpang.simpleexchangeproxyserver.ExchangeRequestObject;
 import io.pingpang.simpleexchangeproxyserver.ExchangeResponseInputStream;
 import io.pingpang.simpleexchangeproxyserver.ExchangeResponseLine;
+import io.pingpang.simpleexchangeproxyserver.ExchangeResponseObject;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -109,20 +110,60 @@ public class NormalMessageHandler extends MessageHandler {
     }
 
     protected void handleResponse(ExchangeRequestLine requestLine) throws IOException {
-        if (getResponseHandleMap().containsKey(requestLine)) {
+        if (!((ExchangeResponseInputStream)input).isChunked() && getResponseHandleMap().containsKey(requestLine)) {
+            input.readContent();
             ResponseHandle handle = getResponseHandleMap().get(requestLine);
             int responseCode = ((ExchangeResponseInputStream)input).getStatusCode();
+            String reason = ((ExchangeResponseInputStream)input).getReasonPhrase();
+            String version = requestLine.getVersion();
             ExchangeResponseLine responseLine = new ExchangeResponseLine();
             responseLine.setResponseCode(responseCode);
-            boolean isBlock = handle.handle(session, responseLine); //Hook
+            responseLine.setVersion(version);
+            responseLine.setReason(reason);
+            ExchangeResponseObject response = new ExchangeResponseObject();
+            response.setResponseLine(responseLine);
+            
+            response.setHeaders(new HashMap(input.getHeaders()));
+            byte[] contentCopy = new byte[input.getContent().length];
+            System.arraycopy(input.getContent(), 0, contentCopy, 0, input.getContent().length);
+            response.setContent(contentCopy);
+            
+            boolean isBlock = handle.handle(session, response); //Hook
             if (!isBlock) {
-                directlyTransmit();
-            } else {
-                dumpInputStream(input);
-            }
+                byte[] responseBytes = convertResponse(response);
+                output.write(responseBytes);
+                output.flush();
+            } 
+            dumpInputStream(input);
         } else {
             directlyTransmit();
         }
+    }
+    
+    protected byte[] convertResponse(ExchangeResponseObject response) throws IOException {
+        ExchangeResponseLine responseLine = response.getResponseLine();
+        String version = responseLine.getVersion();
+        String reason = responseLine.getReason();
+        int statusCode = responseLine.getResponseCode();
+        Map headers = response.getHeaders();
+        byte[] content = response.getContent();
+        
+        StringBuilder sb = new StringBuilder();
+        sb.delete(0, sb.length());
+        
+        sb.append(version).append(" ").append(statusCode).append(" ").append(reason).append("\r\n");
+        headers.forEach((key, value) -> { 
+            sb.append((String)key).append(": ").append((String)value).append("\r\n");
+        });
+        sb.append("\r\n");
+        
+        byte[] part1 = sb.toString().getBytes("ISO8859-1");
+        
+        byte[] completeRequest = new byte[part1.length + content.length];
+        System.arraycopy(part1, 0, completeRequest, 0, part1.length);
+        System.arraycopy(content, 0, completeRequest, part1.length, content.length);
+
+        return completeRequest;
     }
     
     protected void dumpInputStream(ExchangeInputStream inputStream) throws IOException {

@@ -5,7 +5,7 @@
  */
 package io.pingpang.simpleexchangeproxyserver.handler;
 
-import io.pingpang.simpleexchangeproxyserver.ExchangeResponseLine;
+import io.pingpang.simpleexchangeproxyserver.ExchangeResponseObject;
 import io.pingpang.simpleexchangeproxyserver.ExchangeSession;
 
 /**
@@ -14,6 +14,6 @@ import io.pingpang.simpleexchangeproxyserver.ExchangeSession;
  */
 public interface ResponseHandle {
     
-    public boolean handle(ExchangeSession session, ExchangeResponseLine responseLine);
+    public boolean handle(ExchangeSession session, ExchangeResponseObject response);
     
 }
