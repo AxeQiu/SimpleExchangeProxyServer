@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ThreadPoolExecutor;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLServerSocket;
 
 /**
  *
@@ -32,15 +33,55 @@ public class Acceptor implements Callable<Void>, AcceptorMBean {
     protected Routable routable;
     
     /**
+     * 开启Forward secury
+     * @see http://docs.oracle.com/javase/8/docs/technotes/guides/security/SunProviders.html#footnote1-1
+     * @see https://blog.qualys.com/ssllabs/2013/06/25/ssl-labs-deploying-forward-secrecy
+     */
+    protected static final String[] CIPHER_SUITES = {
+        "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384",
+        "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384",
+        "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA",
+        "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
+        "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256",
+        "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256",
+        "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA",
+        "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA",
+        "TLS_ECDHE_ECDSA_WITH_RC4_128_SHA",
+        "TLS_ECDHE_RSA_WITH_RC4_128_SHA",
+        "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
+        "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
+        "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+        "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+        "TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA",
+        "TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA",
+        "TLS_DHE_RSA_WITH_AES_256_CBC_SHA256",
+        "TLS_DHE_DSS_WITH_AES_256_CBC_SHA256",
+        "TLS_DHE_RSA_WITH_AES_256_CBC_SHA",
+        "TLS_DHE_DSS_WITH_AES_256_CBC_SHA",
+        "TLS_DHE_RSA_WITH_AES_128_CBC_SHA256",
+        "TLS_DHE_DSS_WITH_AES_128_CBC_SHA256",
+        "TLS_DHE_RSA_WITH_AES_128_CBC_SHA",
+        "TLS_DHE_DSS_WITH_AES_128_CBC_SHA",
+        "TLS_DHE_RSA_WITH_AES_256_GCM_SHA384",
+        "TLS_DHE_DSS_WITH_AES_256_GCM_SHA384",
+        "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256",
+        "TLS_DHE_DSS_WITH_AES_128_GCM_SHA256"
+    };
+    
+    /**
      * 
      * @return
      * @throws IOException 
      */
     protected ServerSocket getServerSocket() throws IOException {
-        return 
+        ServerSocket serverSocket = 
                 getSslContext() == null ?
                 new ServerSocket() :
                 getSslContext().getServerSocketFactory().createServerSocket();
+        if (serverSocket instanceof SSLServerSocket) {
+            ((SSLServerSocket)serverSocket).setEnabledCipherSuites(CIPHER_SUITES);
+        }
+        return serverSocket;
     }
     
     public Acceptor(InetSocketAddress address) {
