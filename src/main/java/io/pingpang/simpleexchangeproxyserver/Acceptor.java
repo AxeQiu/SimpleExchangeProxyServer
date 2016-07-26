@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ThreadPoolExecutor;
 import javax.net.ssl.SSLContext;
@@ -163,7 +162,7 @@ public class Acceptor implements Callable<Void>, AcceptorMBean {
     /**
      * @return the routable
      */
-    public Map<Integer, Connector> getRoutable() {
+    public Routable getRoutable() {
         return routable;
     }
 

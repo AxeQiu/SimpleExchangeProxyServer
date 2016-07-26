@@ -6,26 +6,26 @@
 package io.pingpang.simpleexchangeproxyserver;
 
 import java.net.InetAddress;
-import java.util.HashMap;
 
 /**
  *
  * @author qiuyue
  */
-public class Routable extends HashMap<Integer, Connector> {
+public class Routable {
     
     protected Connector defaultConnector;
+    protected Router router;
     
     public Routable (Connector defaultConnector) {
         this.defaultConnector = defaultConnector;
     }
     
+    public Routable (Router router) {
+        this.router = router;
+    }
+    
     public Connector getConnector(InetAddress addr) {
-        byte[] ip = addr.getAddress();
-        Integer key = (int) ip[0];
-        if (this.containsKey(key)) {
-            return this.get(key);
-        }
-        return defaultConnector;
+        return router == null ? 
+                defaultConnector : router.getConnector(addr);
     }
 }
