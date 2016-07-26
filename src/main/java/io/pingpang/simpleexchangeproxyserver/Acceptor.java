@@ -33,7 +33,37 @@ public class Acceptor implements Callable<Void>, AcceptorMBean {
     protected Routable routable;
     
     /**
-     * 开启Forward secury
+     * Available CipherSuites: 
+     * 
+     * TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384
+     * TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384
+     * TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA
+     * TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA
+     * TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256
+     * TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256
+     * TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA
+     * TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA
+     * TLS_ECDHE_ECDSA_WITH_RC4_128_SHA
+     * TLS_ECDHE_RSA_WITH_RC4_128_SHA
+     * TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+     * TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+     * TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+     * TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+     * TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA
+     * TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA
+     * TLS_DHE_RSA_WITH_AES_256_CBC_SHA256
+     * TLS_DHE_DSS_WITH_AES_256_CBC_SHA256
+     * TLS_DHE_RSA_WITH_AES_256_CBC_SHA
+     * TLS_DHE_DSS_WITH_AES_256_CBC_SHA
+     * TLS_DHE_RSA_WITH_AES_128_CBC_SHA256
+     * TLS_DHE_DSS_WITH_AES_128_CBC_SHA256
+     * TLS_DHE_RSA_WITH_AES_128_CBC_SHA
+     * TLS_DHE_DSS_WITH_AES_128_CBC_SHA
+     * TLS_DHE_RSA_WITH_AES_256_GCM_SHA384
+     * TLS_DHE_DSS_WITH_AES_256_GCM_SHA384
+     * TLS_DHE_RSA_WITH_AES_128_GCM_SHA256
+     * TLS_DHE_DSS_WITH_AES_128_GCM_SHA256
+     * 
      * @see http://docs.oracle.com/javase/8/docs/technotes/guides/security/SunProviders.html#footnote1-1
      * @see https://blog.qualys.com/ssllabs/2013/06/25/ssl-labs-deploying-forward-secrecy
      */
