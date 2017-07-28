@@ -11,11 +11,9 @@ import io.pingpang.simpleexchangeproxyserver.ExchangeRequestObject;
 import io.pingpang.simpleexchangeproxyserver.ExchangeResponseInputStream;
 import io.pingpang.simpleexchangeproxyserver.ExchangeResponseLine;
 import io.pingpang.simpleexchangeproxyserver.ExchangeResponseObject;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
+import java.util.regex.*;
 
 /**
  *
@@ -54,12 +52,25 @@ public class NormalMessageHandler extends MessageHandler {
     }
     
     protected void handleRequest(ExchangeRequestLine requestLine) throws IOException {
-        if (getRequestHandleMap().containsKey(requestLine)) {
+        String trueVerb = requestLine.getVerb();
+        String truePath = requestLine.getPath();
+        ExchangeRequestLine specifiedRequestLine = null;
+        Set<ExchangeRequestLine> keySet = getRequestHandleMap().keySet();
+        //finding first
+        for (ExchangeRequestLine req : keySet) {
+            String specifiedVerb = req.getVerb();
+            String specifiedPath = req.getPath();
+            if (Pattern.matches(specifiedVerb, trueVerb) && Pattern.matches(specifiedPath, truePath)) {
+                specifiedRequestLine = req;
+                break;
+            }
+        }
+        //if (getRequestHandleMap().containsKey(requestLine)) {
+        if (specifiedRequestLine != null) {
             input.readContent();
-            RequestHandle handle = getRequestHandleMap().get(requestLine);
+            RequestHandle handle = getRequestHandleMap().get(specifiedRequestLine);
             ExchangeRequestObject requestObject = new ExchangeRequestObject();
             requestObject.setRequestLine(requestLine);
-            
             //ATTATION: MUST make a shallow copy
             requestObject.setHeaders(new HashMap(input.getHeaders())); 
             byte[] contentCopy = new byte[input.getContent().length];
@@ -96,7 +107,13 @@ public class NormalMessageHandler extends MessageHandler {
         sb.append(" ").append(version).append("\r\n");
         
         headers.forEach((key, value) -> {
-            sb.append((String)key).append(": ").append((String)value).append("\r\n");
+            assert(value instanceof String || value instanceof Collection);
+            if (value instanceof String) {
+                sb.append((String)key).append(": ").append(value.toString()).append("\r\n");
+            } else {
+                Collection values = (Collection)value;
+                values.forEach(val -> {sb.append((String)key).append(": ").append(val.toString()).append("\r\n");} );
+            }
         });
         sb.append("\r\n");
         
@@ -110,9 +127,23 @@ public class NormalMessageHandler extends MessageHandler {
     }
 
     protected void handleResponse(ExchangeRequestLine requestLine) throws IOException {
-        if (!((ExchangeResponseInputStream)input).isChunked() && getResponseHandleMap().containsKey(requestLine)) {
+        String trueVerb = requestLine.getVerb();
+        String truePath = requestLine.getPath();
+        ExchangeRequestLine specifiedRequestLine = null;
+        Set<ExchangeRequestLine> keySet = getResponseHandleMap().keySet();
+        //finding first
+        for (ExchangeRequestLine req : keySet) {
+            String specifiedVerb = req.getVerb();
+            String specifiedPath = req.getPath();
+            if (Pattern.matches(specifiedVerb, trueVerb) && Pattern.matches(specifiedPath, truePath)) {
+                specifiedRequestLine = req;
+                break;
+            }
+        }
+        //if (!((ExchangeResponseInputStream)input).isChunked() && getResponseHandleMap().containsKey(requestLine)) {
+        if (!((ExchangeResponseInputStream)input).isChunked() && specifiedRequestLine != null) {
             input.readContent();
-            ResponseHandle handle = getResponseHandleMap().get(requestLine);
+            ResponseHandle handle = getResponseHandleMap().get(specifiedRequestLine);
             int responseCode = ((ExchangeResponseInputStream)input).getStatusCode();
             String reason = ((ExchangeResponseInputStream)input).getReasonPhrase();
             String version = requestLine.getVersion();
@@ -152,8 +183,14 @@ public class NormalMessageHandler extends MessageHandler {
         sb.delete(0, sb.length());
         
         sb.append(version).append(" ").append(statusCode).append(" ").append(reason).append("\r\n");
-        headers.forEach((key, value) -> { 
-            sb.append((String)key).append(": ").append((String)value).append("\r\n");
+        headers.forEach((key, value) -> {
+            assert(value instanceof String || value instanceof Collection);
+            if (value instanceof String) {
+                sb.append((String)key).append(": ").append((String)value).append("\r\n");
+            } else {
+                Collection values = (Collection)value;
+                values.forEach(val -> {sb.append((String)key).append(": ").append((String)val).append("\r\n");} );
+            }
         });
         sb.append("\r\n");
         
