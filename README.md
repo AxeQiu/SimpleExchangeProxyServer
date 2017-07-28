@@ -20,6 +20,8 @@ of the server may contain sensitive message that does not erase)
 
 ## How to use
 
+0. The code of the following example can find here: https://github.com/AxeQiu/exchange-proxy-example
+
 
 1. You need to import a depnedency from this project (using Maven):
         
