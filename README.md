@@ -14,7 +14,7 @@ using a Man-In-Middle model to work. It can separate the RPC protocol and regula
 you can rewrite the regular HTTP req/res and directly transmit the RPC message between the client and the server. Currently, the project does
 not support rewriting the RPC message, it just transmitted directly.
 
-## Attation
+## Attention
 Currently, the project is not high-performance-ready(it using synchronize I/O and a CachedThreadPool), and maybe not full-security-ready too(the memory
 of the server may contain sensitive message that does not erase)
 
@@ -82,7 +82,7 @@ of the server may contain sensitive message that does not erase)
 
 
         //Same the Acceptor of the 443 port, the connector serve the 443 port need set a same SSLContext instance.
-        connector443.setSslContext(sslContext);
+        connector443.setSslContext(sslCtx);
 
 
         //wrap the connector to the Router
@@ -198,8 +198,7 @@ of the server may contain sensitive message that does not erase)
         return sslCtx;
 
 
-7. Importing
-        The example above using the following importing
+7. The example above using the following importing
 
         import java.net.*;
         import javax.net.ssl.*;
