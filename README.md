@@ -20,152 +20,117 @@ of the server may contain sensitive message that does not erase)
 
 ## How to use
 
+
 1. You need to import a depnedency from this project (using Maven):
         
         $ git clone git@github.com:AxeQiu/SimpleExchangeProxyServer.git
-
         $ cd SimpleExchangeProxyServer
-
         $ mvn clean install
 
         then, put the dependency to your own project:
 
         <dependency>
-
             <groupId>io.pingpang</groupId>
-
             <artifactId>SimpleExchangeProxyServer</artifactId>
-
             <version>1.0</version>
-
-        </dependency
+        </dependency>
 
 2. Making the Acceptor
 
     The Acceptor represents a socket acceptor that accept the connect request from the client side.
 
         //port 80 proxy
-
         Acceptor acceptor80 = new Acceptor(
-        
             new InetSocketAddress(
-            
-                InegAddress.getByName(serverAddress), 80)); // which the serverAddress is
-                your proxy server ip address or hostname
+                InetAddress.getByName("localhost"), 80));
         
+
 
         //port 443 proxy
-
         Acceptor acceptor443 = new Acceptor(
         
             new InetSocketAddress(
-                InetAddress.getByName(serverAddress), 443)); // which the serverAddress is
-                your proxy server ip address or hostname
+                InetAddress.getByName("localhost"), 443));
+
+
 
         //The 443 port transmits the http message that enabled the SSL/TLS, so you must initialize your own
-        
         //SSLContext using your own keystore that contains the private key of your organization
+        SSLContext sslCtx = SomeSSLContextFactory.getCtx();
 
-        SSLContext sslCtx = SomeSSLContextFactory.getCtx();  // which the SomeSSLContextFactory is your own
-        class that this framework not contains.
-
+        
+        //setting
         acceptor443.setSslContext(sslCtx);
+
 
 3. Making the Connector
 
     The Connector represents a socket connector that connect to the exchange server
 
     //port 80
-
+    //the exAddress is your Exchange server ip or hostname
     final Connector connector80 = new Connector(
-    
-        InetAddress.getByName(exAddress), 80); //which the exAddress is your Exchange server ip or hostname
+        InetAddress.getByName(exAddress), 80);
+
 
     //port 443
-    
+    //the exAddress is your Exchange server ip or hostname
     final Connector connector443 = new Connector(
-        InetAddress.getByName(exAddress), 443); //which the exAddress is your Exchange server ip or hostname
+        InetAddress.getByName(exAddress), 443);
+
 
     //Same the Acceptor of the 443 port, the connector serve the 443 port need set a same SSLContext instance.
-        
     connector443.setSslContext(sslContext);
 
+
     //wrap the connector to the Router
-
     Router route80 = new Router() { 
-    
         @Override
-
         public Connector getConnector(InetAddress addr) {
-
             return connector80;
-
         }
-
-    }
-
-
-
+    };
+    
     Router route443 = new Router() {
-        
         @Override
-
         public Connector getConnector(InetAddress addr) {
-
             return connector443;
-
         }
-
-    }
+    };
 
 4. Testing
 
     Because two socket(80 and 443) need to be proxy, here need two SimpleExchangeProxyServer classes
 
+
     //80 proxy server
-
-    SimpleExchangeProxyServer p80 = new SimpleExchangeProxyServer();
-    
+    final SimpleExchangeProxyServer p80 = new SimpleExchangeProxyServer();
     p80.setAcceptor(acceptor80);
-
-    p80.setRoutable(route80);
+    p80.setRoutable(new Routable(route80));
 
 
 
     //443 proxy server
-
-    SimpleExchangeProxyServer p443 = new SimpleExchangeProxyServer();
-
+    final SimpleExchangeProxyServer p443 = new SimpleExchangeProxyServer();
     p443.setAcceptor(acceptor443);
-
-    p443.setRoutable(route443);
+    p443.setRoutable(new Routable(route443));
 
 
 
     //startup
-
     //443 proxy startup
-
     new Thread() {
-    
         @Override
-
         public void run() {
-
             p443.start();
-
         }
-
     }.start();
-
-
-    //80 proxy startup
     p80.start();
 
-    
 
     If everything all right, the server will proxy the communication between client and Exchange server.
     You can access the proxy server address instead of access the exchange server address directly
+
 
 
 5. Rewriting
@@ -174,41 +139,36 @@ of the server may contain sensitive message that does not erase)
     If the test is OK, from here begin rewrite the request. I will demonstrate rewrite the owa logon request
 
 
-
     //ExchangeRequestLine represents the first line of Http protocol, such "POST /owa/auth.owa"
-
     ExchangeRequestLine owaLogonReq = new ExchangeRequestLine();
-
     owaLogonReq.setVerb("POST"); //here is case sensitive
+    owaLogonReq.setPath("/owa/auth\\\\.owa"); //here can using regular express
 
-    owaLogonReq.setPath("/owa/auth\\.owa"); //here can using regular express
 
     //RequestHandle interface represent the method of rewriting
-    
     RequestHandle handle = new RequestHandle() {
-
         @Override
-
         public boolean handle(ExchangeSession session, ExchangeRequestObject requestObject)
-
             throws HttpException {
-               
+                
+                byte[] bs = requestObject.getContent();
+                String content = new String(bs, Charset.forName("ISO8859-1"));
+                String newCon = content.replace("mypass", "");
+                request.getHeaders().put("Content-Length", String.valueOf(newCon.length())); //MUST use String.valueOf
+                request.setContent(newCon.getBytes(Charset.forName("ISO8859-1")));
                //The returned boolean is represents whether or not the request should be BLOCKED 
-               true represents the blocked(and discards the request), or false represents transmits the request to peer
+               //true represents the blocked(and discards the request),
+               //or false represents transmits the request to peer
                return false;
-
             }
-    }
+    };
 
 
     //Register RequestHandle instance to the Connector
-
     connector80.registerRequestHandle(owaLogonReq, handle);
-
     connector443.registerRequestHandle(owaLogonReq, handle);
 
-
-    Testing again, because the password has been replaced, even the client inputs a right password he still got the "password
+    Testing again, because the password(supports that is "mypass") has been replaced, even the client inputs a right password he still got the "password
     error" message.
 
 
@@ -221,22 +181,25 @@ of the server may contain sensitive message that does not erase)
 
     
     KeyStore  = KeyStore.getInstance("PKCS12");
-
     ks.load(new ByteArrayInputStream(
         Files.readAllBytes(Paths.get("my.p12"))), "pass".toCharArray());
-
     KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-
     kmf.init(ks, "pass".toCharArray());
-
     TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
-
     tmf.init(ks);
-
     SSLContext.sslCtx = SSLContext.getInstance("TLSv1.2"); //TLSv1.2 is supported by JDK8
-
     sslCtx.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
-
     return sslCtx;
 
+
+7. Importing
+        The example above using the following importing
+
+        import java.net.*;
+        import javax.net.ssl.*;
+        import java.nio.charset.Charset;
+        import io.pingpang.simpleexchangeproxyserver.*;
+        import io.pingpang.simpleexchangeproxyserver.handler.*;
+        import io.pingpang.simpleexchangeproxyserver.dispatcher.*;
+        import mx4j.tools.adaptor.http.*;
 
