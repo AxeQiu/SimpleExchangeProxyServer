@@ -67,65 +67,66 @@ of the server may contain sensitive message that does not erase)
 
     The Connector represents a socket connector that connect to the exchange server
 
-    //port 80
-    //the exAddress is your Exchange server ip or hostname
-    final Connector connector80 = new Connector(
-        InetAddress.getByName(exAddress), 80);
 
 
-    //port 443
-    //the exAddress is your Exchange server ip or hostname
-    final Connector connector443 = new Connector(
-        InetAddress.getByName(exAddress), 443);
+        //port 80. The exAddress is your Exchange server ip or hostname
+        final Connector connector80 = new Connector(
+            InetAddress.getByName(exAddress), 80);
 
 
-    //Same the Acceptor of the 443 port, the connector serve the 443 port need set a same SSLContext instance.
-    connector443.setSslContext(sslContext);
+        //port 443. The exAddress is your Exchange server ip or hostname
+        final Connector connector443 = new Connector(
+            InetAddress.getByName(exAddress), 443);
 
 
-    //wrap the connector to the Router
-    Router route80 = new Router() { 
-        @Override
-        public Connector getConnector(InetAddress addr) {
-            return connector80;
-        }
-    };
-    
-    Router route443 = new Router() {
-        @Override
-        public Connector getConnector(InetAddress addr) {
-            return connector443;
-        }
-    };
+        //Same the Acceptor of the 443 port, the connector serve the 443 port need set a same SSLContext instance.
+        connector443.setSslContext(sslContext);
+
+
+        //wrap the connector to the Router
+        Router route80 = new Router() { 
+            @Override
+            public Connector getConnector(InetAddress addr) {
+                return connector80;
+            }
+        };
+        
+        Router route443 = new Router() {
+            @Override
+            public Connector getConnector(InetAddress addr) {
+                return connector443;
+            }
+        };
 
 4. Testing
 
     Because two socket(80 and 443) need to be proxy, here need two SimpleExchangeProxyServer classes
 
 
-    //80 proxy server
-    final SimpleExchangeProxyServer p80 = new SimpleExchangeProxyServer();
-    p80.setAcceptor(acceptor80);
-    p80.setRoutable(new Routable(route80));
+
+        //80 proxy server
+        final SimpleExchangeProxyServer p80 = new SimpleExchangeProxyServer();
+        p80.setAcceptor(acceptor80);
+        p80.setRoutable(new Routable(route80));
 
 
 
-    //443 proxy server
-    final SimpleExchangeProxyServer p443 = new SimpleExchangeProxyServer();
-    p443.setAcceptor(acceptor443);
-    p443.setRoutable(new Routable(route443));
+        //443 proxy server
+        final SimpleExchangeProxyServer p443 = new SimpleExchangeProxyServer();
+        p443.setAcceptor(acceptor443);
+        p443.setRoutable(new Routable(route443));
 
 
 
-    //startup
-    //443 proxy startup
-    new Thread() {
-        @Override
-        public void run() {
-            p443.start();
-        }
-    }.start();
-    p80.start();
+        //startup
+        //443 proxy startup
+        new Thread() {
+            @Override
+            public void run() {
+                p443.start();
+            }
+        }.start();
+        p80.start();
 
 
     If everything all right, the server will proxy the communication between client and Exchange server.
@@ -139,34 +140,37 @@ of the server may contain sensitive message that does not erase)
     If the test is OK, from here begin rewrite the request. I will demonstrate rewrite the owa logon request
 
 
-    //ExchangeRequestLine represents the first line of Http protocol, such "POST /owa/auth.owa"
-    ExchangeRequestLine owaLogonReq = new ExchangeRequestLine();
-    owaLogonReq.setVerb("POST"); //here is case sensitive
-    owaLogonReq.setPath("/owa/auth\\\\.owa"); //here can using regular express
+
+        //ExchangeRequestLine represents the first line of Http protocol, such "POST /owa/auth.owa"
+        ExchangeRequestLine owaLogonReq = new ExchangeRequestLine();
+        owaLogonReq.setVerb("POST"); //here is case sensitive
+        owaLogonReq.setPath("/owa/auth\\\\.owa"); //here can using regular express
 
 
-    //RequestHandle interface represent the method of rewriting
-    RequestHandle handle = new RequestHandle() {
-        @Override
-        public boolean handle(ExchangeSession session, ExchangeRequestObject requestObject)
-            throws HttpException {
-                
-                byte[] bs = requestObject.getContent();
-                String content = new String(bs, Charset.forName("ISO8859-1"));
-                String newCon = content.replace("mypass", "");
-                request.getHeaders().put("Content-Length", String.valueOf(newCon.length())); //MUST use String.valueOf
-                request.setContent(newCon.getBytes(Charset.forName("ISO8859-1")));
-               //The returned boolean is represents whether or not the request should be BLOCKED 
-               //true represents the blocked(and discards the request),
-               //or false represents transmits the request to peer
-               return false;
-            }
-    };
+        //RequestHandle interface represent the method of rewriting
+        RequestHandle handle = new RequestHandle() {
+            @Override
+            public boolean handle(ExchangeSession session, ExchangeRequestObject requestObject)
+                throws HttpException {
+                    
+                    byte[] bs = requestObject.getContent();
+                    String content = new String(bs, Charset.forName("ISO8859-1"));
+                    String newCon = content.replace("mypass", "");
+                    request.getHeaders().put(
+                        "Content-Length",
+                        String.valueOf(newCon.length())); //MUST use String.valueOf
+                    request.setContent(newCon.getBytes(Charset.forName("ISO8859-1")));
+                   //The returned boolean is represents whether or not the request should be BLOCKED 
+                   //true represents the blocked(and discards the request),
+                   //or false represents transmits the request to peer
+                   return false;
+                }
+        };
 
 
-    //Register RequestHandle instance to the Connector
-    connector80.registerRequestHandle(owaLogonReq, handle);
-    connector443.registerRequestHandle(owaLogonReq, handle);
+        //Register RequestHandle instance to the Connector
+        connector80.registerRequestHandle(owaLogonReq, handle);
+        connector443.registerRequestHandle(owaLogonReq, handle);
 
     Testing again, because the password(supports that is "mypass") has been replaced, even the client inputs a right password he still got the "password
     error" message.
@@ -180,16 +184,16 @@ of the server may contain sensitive message that does not erase)
     and the password of the certificate is "pass"
 
     
-    KeyStore  = KeyStore.getInstance("PKCS12");
-    ks.load(new ByteArrayInputStream(
-        Files.readAllBytes(Paths.get("my.p12"))), "pass".toCharArray());
-    KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-    kmf.init(ks, "pass".toCharArray());
-    TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
-    tmf.init(ks);
-    SSLContext.sslCtx = SSLContext.getInstance("TLSv1.2"); //TLSv1.2 is supported by JDK8
-    sslCtx.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
-    return sslCtx;
+        KeyStore  = KeyStore.getInstance("PKCS12");
+        ks.load(new ByteArrayInputStream(
+            Files.readAllBytes(Paths.get("my.p12"))), "pass".toCharArray());
+        KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+        kmf.init(ks, "pass".toCharArray());
+        TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
+        tmf.init(ks);
+        SSLContext.sslCtx = SSLContext.getInstance("TLSv1.2"); //TLSv1.2 is supported by JDK8
+        sslCtx.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
+        return sslCtx;
 
 
 7. Importing
